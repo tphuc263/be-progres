@@ -10,7 +10,7 @@ import com.webanhang.team_project.dto.user.request.CreateUserRequest;
 import com.webanhang.team_project.dto.auth.request.OtpVerificationRequest;
 import com.webanhang.team_project.dto.auth.request.RegisterRequest;
 import com.webanhang.team_project.dto.user.request.UpdateUserRequest;
-import com.webanhang.team_project.security.otp.otp.OtpService;
+import com.webanhang.team_project.security.otp.OtpService;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
