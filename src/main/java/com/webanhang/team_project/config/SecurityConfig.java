@@ -2,6 +2,8 @@ package com.webanhang.team_project.config;
 
 import com.webanhang.team_project.security.jwt.AuthTokenFilter;
 import com.webanhang.team_project.security.jwt.JwtEntryPoint;
+import com.webanhang.team_project.security.oauth2.OAuth2FailureHandler;
+import com.webanhang.team_project.security.oauth2.OAuth2SuccessHandler;
 import com.webanhang.team_project.security.userdetails.AppUserDetailsService;
 import com.webanhang.team_project.utils.ErrorResponseUtils;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +41,8 @@ public class SecurityConfig {
     private final JwtEntryPoint authEntryPoint;
     private final AuthTokenFilter authTokenFilter;
     private final OAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
+    private final OAuth2FailureHandler oAuth2FailureHandler;
     private final ErrorResponseUtils errorResponseUtils;
 
     @Bean
@@ -87,12 +91,8 @@ public class SecurityConfig {
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(oAuth2UserService))
-                        .successHandler((request, response, authentication) -> response
-                                .sendRedirect("/api/v1/customer/dashboard"))
-                        .failureHandler((request, response, exception) -> {
-                            log.error("Authentication error: {}", exception.getMessage());
-                            response.sendRedirect("/login?error=" + exception.getMessage());
-                        }))
+                        .successHandler(oAuth2SuccessHandler)
+                        .failureHandler(oAuth2FailureHandler))
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();

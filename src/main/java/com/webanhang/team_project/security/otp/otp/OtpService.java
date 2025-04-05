@@ -1,4 +1,4 @@
-package com.webanhang.team_project.service.otp;
+package com.webanhang.team_project.security.otp.otp;
 
 import com.webanhang.team_project.model.User;
 import com.webanhang.team_project.repository.UserRepository;
