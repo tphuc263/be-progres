@@ -7,24 +7,19 @@ import lombok.NoArgsConstructor;
 import java.util.Map;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class ApiResponse<T> {
-    private String status;       // "success" hoặc "error"
     private T data;              // Dữ liệu trả về
     private String message;      // Thông báo mô tả
     private Map<String, Object> pagination;  // Thông tin phân trang (nếu có)
 
     // Constructor cơ bản cho phản hồi thành công
     public ApiResponse(T data, String message) {
-        this.status = "success";
         this.data = data;
         this.message = message;
     }
 
     // Constructor cho phản hồi thành công có phân trang
     public ApiResponse(T data, String message, Map<String, Object> pagination) {
-        this.status = "success";
         this.data = data;
         this.message = message;
         this.pagination = pagination;
@@ -32,7 +27,6 @@ public class ApiResponse<T> {
 
     // Constructor cho phản hồi lỗi
     public ApiResponse(String message) {
-        this.status = "error";
         this.message = message;
         this.data = null;
     }

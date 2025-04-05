@@ -4,7 +4,11 @@ import com.webanhang.team_project.dto.auth.request.LoginRequest;
 import com.webanhang.team_project.dto.auth.request.OtpVerificationRequest;
 import com.webanhang.team_project.dto.auth.request.RegisterRequest;
 import com.webanhang.team_project.dto.response.ApiResponse;
+import com.webanhang.team_project.dto.user.UserDto;
+import com.webanhang.team_project.model.User;
+import com.webanhang.team_project.repository.UserRepository;
 import com.webanhang.team_project.security.jwt.JwtUtils;
+import com.webanhang.team_project.security.userdetails.AppUserDetails;
 import com.webanhang.team_project.security.userdetails.AppUserDetailsService;
 import com.webanhang.team_project.service.user.UserService;
 import com.webanhang.team_project.utils.CookieUtils;
@@ -35,6 +39,7 @@ public class AuthController {
     private final AppUserDetailsService userDetailsService;
     private final AuthenticationManager authenticationManager;
     private final UserService userService;
+    private final UserRepository userRepository;
 
     @Value("${auth.token.refreshExpirationInMils}")
     private Long refreshTokenExpirationTime;
@@ -54,9 +59,20 @@ public class AuthController {
             String refreshToken = jwtUtils.generateRefreshToken(request.getEmail());
             cookieUtils.addRefreshTokenCookie(response, refreshToken, refreshTokenExpirationTime);
 
+            AppUserDetails userDetails = (AppUserDetails) authentication.getPrincipal();
+            User user = userRepository.findById(userDetails.getId()).orElseThrow();
+
             Map<String, Object> responseData = new HashMap<>();
             responseData.put("accessToken", accessToken);
-            responseData.put("message", "Đăng nhập thành công!");
+
+            Map<String, Object> userMap = new HashMap<>();
+            userMap.put("id", user.getId());
+            userMap.put("email", user.getEmail());
+            userMap.put("firstName", user.getFirstName());
+            userMap.put("lastName", user.getLastName());
+            userMap.put("role", user.getRole().getName().name());
+            userMap.put("isActive", user.isActive());
+            responseData.put("user", userMap);
 
             return ResponseEntity.ok(ApiResponse.success(responseData, "Success"));
         } catch (AuthenticationException e) {
@@ -148,5 +164,19 @@ public class AuthController {
             return ResponseEntity.ok(ApiResponse.success(userInfo, "Đã xác thực."));
         }
         return ResponseEntity.ok(ApiResponse.success(Map.of("authenticated", false), "Chưa xác thực."));
+    }
+
+    @GetMapping("/current-user")
+    public ResponseEntity<ApiResponse> getCurrentUser(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error("User not authenticated"));
+        }
+
+        AppUserDetails userDetails = (AppUserDetails) authentication.getPrincipal();
+        User user = userService.getUserById(userDetails.getId());
+        UserDto userDto = userService.convertUserToDto(user);
+
+        return ResponseEntity.ok(ApiResponse.success(userDto, "Current user info retrieved successfully"));
     }
 }
