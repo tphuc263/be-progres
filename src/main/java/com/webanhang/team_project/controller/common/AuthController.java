@@ -100,7 +100,7 @@ public class AuthController {
         try {
             boolean isVerified = userService.verifyOtp(request);
             if (isVerified) {
-                return ResponseEntity.ok(ApiResponse.success(null, "User verified successfully!"));
+                return ResponseEntity.ok(ApiResponse.success(null, "Xác thực thành công! Tài khoản đã được kích hoạt."));
             }
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
@@ -168,8 +168,10 @@ public class AuthController {
 
     @GetMapping("/current-user")
     public ResponseEntity<ApiResponse> getCurrentUser(Authentication authentication) {
+        log.info("Authentication: {}", authentication);
         if (authentication == null || !authentication.isAuthenticated()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
                     .body(ApiResponse.error("User not authenticated"));
         }
 

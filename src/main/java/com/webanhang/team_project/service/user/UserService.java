@@ -85,6 +85,7 @@ public class UserService implements IUserService {
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setActive(false);
 
         UserRole userRole = UserRole.valueOf(request.getRole());
         Role role = roleRepository.findByName(userRole)
@@ -100,7 +101,9 @@ public class UserService implements IUserService {
 
     @Override
     public boolean verifyOtp(OtpVerificationRequest request) {
-        return otpService.validateOtp(request.getEmail(), request.getOtp());
+        // Kiểm tra OTP và kích hoạt tài khoản nếu hợp lệ
+        boolean isValid = otpService.validateOtp(request.getEmail(), request.getOtp());
+        return isValid;
     }
 
 }
